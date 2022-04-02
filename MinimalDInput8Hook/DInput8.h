@@ -1,8 +1,7 @@
 #pragma once
 #include <unknwn.h>
 
-
-typedef HRESULT(*DirectInput8Create_t)(
+typedef HRESULT(WINAPI*DirectInput8Create_t)(
 	HINSTANCE hinst,
 	DWORD dwVersion,
 	REFIID riidltf,
@@ -15,7 +14,7 @@ extern HMODULE DInput8DLL;
 
 extern "C"
 {
-	DINPUT8_API HRESULT DirectInput8Create(
+	DINPUT8_API HRESULT WINAPI DirectInput8Create(
 		HINSTANCE hinst,
 		DWORD dwVersion,
 		REFIID riidltf,

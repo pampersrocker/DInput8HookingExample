@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CustomHooks.h"
 
-typedef HANDLE(*CreateFileA_t)(
+typedef HANDLE(WINAPI*CreateFileA_t)(
 	LPCSTR                lpFileName,
 	DWORD                 dwDesiredAccess,
 	DWORD                 dwShareMode,
@@ -10,7 +10,7 @@ typedef HANDLE(*CreateFileA_t)(
 	DWORD                 dwFlagsAndAttributes,
 	HANDLE                hTemplateFile);
 
-typedef HANDLE(*CreateFileW_t)(
+typedef HANDLE(WINAPI*CreateFileW_t)(
 	LPCWSTR                lpFileName,
 	DWORD                 dwDesiredAccess,
 	DWORD                 dwShareMode,
@@ -22,7 +22,7 @@ typedef HANDLE(*CreateFileW_t)(
 CreateFileA_t OriginalCreateFileA;
 CreateFileW_t OriginalCreateFileW;
 
-HANDLE CreateFileA_Wrapper(
+HANDLE WINAPI CreateFileA_Wrapper(
 	LPCSTR                lpFileName,
 	DWORD                 dwDesiredAccess,
 	DWORD                 dwShareMode,
@@ -47,7 +47,7 @@ HANDLE CreateFileA_Wrapper(
 		hTemplateFile);
 }
 
-HANDLE CreateFileW_Wrapper(
+HANDLE WINAPI CreateFileW_Wrapper(
 	LPCWSTR                lpFileName,
 	DWORD                 dwDesiredAccess,
 	DWORD                 dwShareMode,
