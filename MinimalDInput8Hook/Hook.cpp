@@ -22,7 +22,7 @@ void* HookFunction_Internal(const char* DLLName, const char* FunctionName, void*
 	BYTE* BaseAddress = (BYTE*)PEBExtendedInfo->ImageBaseAddress;
 
 	// Get the Address of our NT Image headers
-	PIMAGE_NT_HEADERS64 FileHeader = (PIMAGE_NT_HEADERS64)(BaseAddress + pDOSHeader->e_lfanew);
+	PIMAGE_NT_HEADERS FileHeader = (PIMAGE_NT_HEADERS)(BaseAddress + pDOSHeader->e_lfanew);
 
 	// Retrieve the import directory in which all imported dlls and functions are listed
 	IMAGE_DATA_DIRECTORY ImportDirectory = FileHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
@@ -38,8 +38,7 @@ void* HookFunction_Internal(const char* DLLName, const char* FunctionName, void*
 		// Check if we found our DLL in the import table
 		if (!strcmp(ImportDLLName, DLLName))
 		{
-
-			PIMAGE_THUNK_DATA64 ImportNameTable = (PIMAGE_THUNK_DATA64)(BaseAddress + Descriptor->OriginalFirstThunk);
+			PIMAGE_THUNK_DATA ImportNameTable = (PIMAGE_THUNK_DATA)(BaseAddress + Descriptor->OriginalFirstThunk);
 			int Offset = 0;
 			// The import name table is a null terminated array, so iterate until we either found it or reach the null termination
 			while (ImportNameTable->u1.AddressOfData != 0)
@@ -47,20 +46,19 @@ void* HookFunction_Internal(const char* DLLName, const char* FunctionName, void*
 				PIMAGE_IMPORT_BY_NAME NameImport = (PIMAGE_IMPORT_BY_NAME)(BaseAddress + ImportNameTable->u1.AddressOfData);
 				// Null terminated function name start pointer is stored in here
 				const char* ImportFunctionName = NameImport->Name;
-
 				if (!strcmp(FunctionName, ImportFunctionName))
 				{
-					PIMAGE_THUNK_DATA64 ImportAddressTable = (PIMAGE_THUNK_DATA64)(BaseAddress + Descriptor->FirstThunk);
+					PIMAGE_THUNK_DATA ImportAddressTable = (PIMAGE_THUNK_DATA)(BaseAddress + Descriptor->FirstThunk);
 					// The import address table is in the same order as the import name table
 					ImportAddressTable += Offset;
 
 					void* OriginalAddress = (void*)ImportAddressTable->u1.AddressOfData;
 					DWORD OldProtection;
 					// Make the page writable to patch the pointer
-					VirtualProtect(ImportAddressTable, sizeof(IMAGE_THUNK_DATA64), PAGE_READWRITE, &OldProtection);
+					VirtualProtect(ImportAddressTable, sizeof(IMAGE_THUNK_DATA), PAGE_READWRITE, &OldProtection);
 					ImportAddressTable->u1.AddressOfData = (ULONGLONG)NewAddress;
 					// Restore page protection to the previous state
-					VirtualProtect(ImportAddressTable, sizeof(IMAGE_THUNK_DATA64), OldProtection, &OldProtection);
+					VirtualProtect(ImportAddressTable, sizeof(IMAGE_THUNK_DATA), OldProtection, &OldProtection);
 					return OriginalAddress;
 				}
 
